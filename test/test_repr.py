@@ -80,8 +80,16 @@ class TestElementsRepr(unittest.TestCase):
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
+        obj = Path("M0,0L100,100Z", transform="scale(4)")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
     def test_repr_rect(self):
         obj = Rect(x=100, y=100, width=500, height=500)
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
+        obj = Rect(x=100, y=100, width=500, height=500, transform="scale(2)", stroke="red", fill="blue")
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
@@ -90,13 +98,25 @@ class TestElementsRepr(unittest.TestCase):
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
+        obj = Ellipse(cx=100, cy=100, rx=500, ry=500, transform="scale(2)", stroke="red", fill="blue")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
     def test_repr_circle(self):
         obj = Circle(cx=100, cy=100, r=500)
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
+        obj = Circle(cx=100, cy=100, r=500, transform="scale(2)", stroke="red", fill="blue")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
     def test_repr_simpleline(self):
-        obj = Line(start=(0,0), end=(100,100))
+        obj = SimpleLine(start=(0,0), end=(100,100))
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
+        obj = SimpleLine(start=(0, 0), end=(100, 100), transform="scale(2)", stroke="red", fill="blue")
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
@@ -105,13 +125,25 @@ class TestElementsRepr(unittest.TestCase):
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
+        obj = Polyline("0,0 7,7 10,10 0 20", transform="scale(2)", stroke="red", fill="blue")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
     def test_repr_polygon(self):
         obj = Polygon("0,0 7,7 10,10 0 20")
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
+        obj = Polygon("0,0 7,7 10,10 0 20", transform="scale(2)", stroke="red", fill="blue")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
     def test_repr_group(self):
         obj = Group()
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
+        obj = Group(transform="scale(2)", stroke="red", fill="blue")
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
@@ -126,16 +158,19 @@ class TestElementsRepr(unittest.TestCase):
         self.assertFalse(obj != eval(repr(obj)))
 
     def test_repr_text(self):
-        obj = SVGText(x=0, y=0, text="Hello")
-        obj = repr(obj)
+        obj = Text(x=0, y=0, text="Hello")
         self.assertTrue(obj == eval(repr(obj)))
         self.assertFalse(obj != eval(repr(obj)))
 
-    # SVGImage equals not overloaded.
-    # def test_repr_image(self):
-    #     obj = SVGImage(url="test.png")
-    #     self.assertTrue(obj == eval(repr(obj)))
-    #     self.assertFalse(obj != eval(repr(obj)))
+        obj = Text(x=0, y=0, text="Hello", transform="scale(2)", stroke="red", fill="blue")
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
+
+    def test_repr_image(self):
+        obj = Image(url="test.png", transform="scale(2)")
+        obj_repr = repr(obj)
+        self.assertTrue(obj == eval(repr(obj)))
+        self.assertFalse(obj != eval(repr(obj)))
 
     def test_repr_desc(self):
         obj = Desc("Describes Object")

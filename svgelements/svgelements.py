@@ -39,7 +39,7 @@ The goal is to provide svg like path objects and structures. The svg standard 1.
 be used to provide much of the decisions within path objects. Such that if there is a question on
 implementation if the SVG documentation has a methodology it should be used.
 
-Though not required the SVGImage class acquires new functionality if provided with PIL/Pillow as an import
+Though not required the Image class acquires new functionality if provided with PIL/Pillow as an import
 and the Arc can do exact arc calculations if scipy is installed.
 """
 
@@ -7495,7 +7495,7 @@ class Pattern(SVGElement, list):
         return self
 
 
-class SVGText(SVGElement, GraphicObject, Transformable):
+class Text(SVGElement, GraphicObject, Transformable):
     """
     SVG Text are defined in SVG 2.0 Chapter 11
 
@@ -7530,21 +7530,53 @@ class SVGText(SVGElement, GraphicObject, Transformable):
 
     def __str__(self):
         parts = list()
-        parts.append("'%s'" % self.text)
-        parts.append("font_family=%s" % self.font_family)
-        parts.append("anchor=%s" % self.anchor)
-        parts.append("font_size=%d" % self.font_size)
-        parts.append("font_weight=%s" % str(self.font_weight))
+        parts.append('"%s"' % self.text)
+        parts.append('font_family="%s"' % self.font_family)
+        parts.append('anchor="%s"' % self.anchor)
+        parts.append('font_size="%d"' % self.font_size)
+        parts.append('font_weight="%s"' % str(self.font_weight))
         return "Text(%s)" % (", ".join(parts))
 
     def __repr__(self):
         parts = list()
-        parts.append("%s" % self.text)
-        parts.append("font_family=%s" % self.font_family)
-        parts.append("anchor=%s" % self.anchor)
-        parts.append("font_size=%d" % self.font_size)
-        parts.append("font_weight=%s" % str(self.font_weight))
+        parts.append('"%s"' % self.text)
+        parts.append('font_family="%s"' % self.font_family)
+        parts.append('anchor="%s"' % self.anchor)
+        parts.append('font_size="%d"' % self.font_size)
+        parts.append('font_weight="%s"' % str(self.font_weight))
         return "Text(%s)" % (", ".join(parts))
+
+    def __eq__(self, other):
+        if not isinstance(other, Text):
+            return NotImplemented
+        if self.text != other.text:
+            return False
+        if self.width != other.width:
+            return False
+        if self.height != other.height:
+            return False
+        if self.x != other.x:
+            return False
+        if self.y != other.y:
+            return False
+        if self.dx != other.dx:
+            return False
+        if self.dy != other.dy:
+            return False
+        if self.anchor != other.anchor:
+            return False
+        if self.font_family != other.font_family:
+            return False
+        if self.font_size != other.font_size:
+            return False
+        if self.font_weight != other.font_weight:
+            return False
+        return self.font_face == other.font_face
+
+    def __ne__(self, other):
+        if not isinstance(other, Text):
+            return NotImplemented
+        return not self == other
 
     def property_by_object(self, s):
         Transformable.property_by_object(self, s)
@@ -7651,7 +7683,7 @@ class SVGText(SVGElement, GraphicObject, Transformable):
         return self
 
     def __copy__(self):
-        return SVGText(self)
+        return Text(self)
 
     def bbox(self, transformed=True):
         """
@@ -7685,12 +7717,12 @@ class SVGText(SVGElement, GraphicObject, Transformable):
         return xmin, ymin, xmax, ymax
 
 
-class SVGImage(SVGElement, GraphicObject, Transformable):
+SVGText = Text
+
+
+class Image(SVGElement, GraphicObject, Transformable):
     """
     SVG Images are defined in SVG 2.0 12.3
-
-    This class is called SVG Image rather than image as a guard against many Image objects
-    which are quite useful and would be ideal for reading the linked or contained data.
     """
 
     def __init__(self, *args, **kwargs):
@@ -7749,7 +7781,7 @@ class SVGImage(SVGElement, GraphicObject, Transformable):
         if self.url is not None:
             values.append("%s='%s'" % (SVG_HREF, self.url))
         params = ", ".join(values)
-        return "SVGImage(%s)" % params
+        return "Image(%s)" % params
 
     def property_by_object(self, s):
         SVGElement.property_by_object(self, s)
@@ -7814,11 +7846,37 @@ class SVGImage(SVGElement, GraphicObject, Transformable):
 
     def __copy__(self):
         """
-        Copy of SVGImage. This will not copy the .image subobject in a deep manner
+        Copy of Image. This will not copy the .image subobject in a deep manner
         since it's optional that that object will exist or not. As such if using PIL it would
         be required to either say self.image = self.image.copy() or call .load() again.
         """
-        return SVGImage(self)
+        return Image(self)
+
+    def __eq__(self, other):
+        if not isinstance(other, Text):
+            return NotImplemented
+        if self.url != other.url:
+            return False
+        if self.data != other.data:
+            return False
+        if self.width != other.width:
+            return False
+        if self.height != other.height:
+            return False
+        if self.x != other.x:
+            return False
+        if self.y != other.y:
+            return False
+        if self.image != other.image:
+            return False
+        if self.viewbox != other.viewbox:
+            return False
+        return self.preserveAspectRatio != other.preserveAspectRatio
+
+    def __ne__(self, other):
+        if not isinstance(other, Image):
+            return NotImplemented
+        return not self == other
 
     @property
     def viewbox_transform(self):
@@ -7912,6 +7970,8 @@ class SVGImage(SVGElement, GraphicObject, Transformable):
         max_x = max(x_vals)
         max_y = max(y_vals)
         return min_x, min_y, max_x, max_y
+
+SVGImage = Image
 
 
 class Desc(SVGElement):
@@ -8398,7 +8458,7 @@ class SVG(Group):
                         elif SVG_TAG_RECT == tag:
                             s = Rect(values)
                         else:  # SVG_TAG_IMAGE == tag:
-                            s = SVGImage(values)
+                            s = Image(values)
                     except ValueError:
                         continue
                     s.render(ppi=ppi, width=width, height=height)
@@ -8451,7 +8511,7 @@ class SVG(Group):
                     if SVG_ATTR_ID in attributes and root is not None:
                         root.objects[attributes[SVG_ATTR_ID]] = s
                 if tag in (SVG_TAG_TEXT, SVG_TAG_TSPAN):
-                    s = SVGText(values, text=elem.text)
+                    s = Text(values, text=elem.text)
                     s.render(ppi=ppi, width=width, height=height)
                     if reify:
                         s.reify()
